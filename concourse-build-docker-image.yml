@@ -1,0 +1,31 @@
+resources:
+# The repo with our Dockerfile
+- name: ngx-api-utils
+  type: git
+  icon: github
+  source:
+    uri: https://github.com/tsutsarin/ngx-api-utils.git
+    branch: fake-auth-dockerfile
+
+jobs:
+- name: build-and-run
+  plan:
+  - get: ngx-api-utils
+  - task: build-image
+    privileged: true # oci-build-task must run in a privileged container
+    config:
+      platform: linux
+      image_resource:
+        type: registry-image
+        source:
+          repository: concourse/oci-build-task
+      inputs:
+      - name: concourse-examples
+      outputs:
+      - name: image
+      params:
+        DOCKERFILE: ./fake-api-jwt-json-server/Dockerfile
+        # CONTEXT: concourse-examples/Dockerfiles/simple
+        UNPACK_ROOTFS: true #add this param
+      run: # binary used to build the image
+        path: build
